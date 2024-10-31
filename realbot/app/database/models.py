@@ -27,12 +27,14 @@ class Teacher(Base):
 class Greeting(Base):
     __tablename__ = "greetings"
 
-    id = Column(Integer, primary_key=True, autoincrement=True) #
-    teacher_id = Column(Integer, nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    teacher_id = Column(Integer, ForeignKey('teachers.id'), nullable=False)  # Внешний ключ для teacher_id
     message_text = Column(Text, nullable=False)
     media = Column(String, nullable=True)
     users_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    sender = relationship("User", backref="greetings") #
+
+    sender = relationship("User", backref="greetings")  # Связь с отправителем
+    teacher = relationship("Teacher", backref="greetings")  # Связь с учителем
 
 
 class User(Base):
@@ -40,7 +42,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     tg_id = mapped_column(BigInteger)
     username: Mapped[str] = mapped_column(String(100))
-    rights: Mapped[bool] = mapped_column(Boolean, default=False)  # Указан Boolean вместо String
+    rights: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
 
