@@ -1,5 +1,5 @@
 from app.database.models import async_session, Teacher, Greeting, User
-from sqlalchemy import select, update
+from sqlalchemy import select, update, insert
 from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import NoResultFound
 
@@ -89,3 +89,61 @@ async def update_rights(tg_id: int):
                 )
         await session.commit()
         print(f"Права пользователя с tg_id {tg_id} обновлены на True.")
+
+
+# Обновление информации о преподавателе
+async def update_teacher(teacher_id, full_name, email, telegram_username):
+    async with async_session() as session:
+        await session.execute(
+            update(Teacher)
+            .where(Teacher.id == teacher_id)
+            .values(full_name=full_name, email=email, telegram_username=telegram_username)
+        )
+        await session.commit()
+
+
+# Обновление текста поздравления
+async def update_greeting_text(greeting_id, new_text):
+    async with async_session() as session:
+        await session.execute(
+            update(Greeting)
+            .where(Greeting.id == greeting_id)
+            .values(message_text=new_text)
+        )
+        await session.commit()
+
+
+# Add a new teacher
+async def add_teacher(full_name, email, telegram_username):
+    async with async_session() as session:
+        new_teacher = Teacher(full_name=full_name, email=email, telegram_username=telegram_username)
+        session.add(new_teacher)
+        await session.commit()
+
+
+# Add a new greeting for admin
+async def add_admin_greeting(teacher_id, message_text, users_id):
+    async with async_session() as session:
+        new_greeting = Greeting(
+            teacher_id=teacher_id,
+            message_text=message_text,
+            users_id=users_id
+        )
+        session.add(new_greeting)
+        await session.commit()
+
+
+async def update_greeting_media(greeting_id, new_media):
+    async with async_session() as session:
+        await session.execute(
+            update(Greeting)
+            .where(Greeting.id == greeting_id)
+            .values(media=new_media)
+        )
+        await session.commit()
+
+
+async def get_teacher_by_id(teacher_id):
+    async with async_session() as session:
+        result = await session.execute(select(Teacher).where(Teacher.id == teacher_id))
+        return result.scalar_one()

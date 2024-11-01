@@ -45,7 +45,6 @@ class User(Base):
     rights: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
-
 async def async_main():
     async with engine.begin() as conn:
         # Создание таблиц
