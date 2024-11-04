@@ -58,22 +58,39 @@ async def send_teacher_data(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer(
         f"Контакты преподавателя:\n\n"
         f"Email: {teacher.email}\n"
-        f"Telegram: @{teacher.telegram_username}"
+        f"Telegram: {teacher.telegram_username}"
     )
     await state.clear()
 
 
 @router.callback_query(F.data.startswith("teacher_"))
 async def send_greeting(callback: CallbackQuery, state: FSMContext):
-    _, teacher_id_str = callback.data.split("_")
-    try:
-        teacher_id = int(teacher_id_str)
-    except ValueError:
-        await callback.message.answer("Ошибка: неверный ID преподавателя.")
-        return
-    await callback.message.answer("Отправьте текст поздравления:")
-    await state.update_data(teacher_id=teacher_id)
-    await state.set_state(Form.waiting_for_greeting_text)
+    data_parts = callback.data.split("_")
+
+    if len(data_parts) == 2:  # Ожидаем два аргумента (например, "teacher_123")
+        _, teacher_id_str = data_parts
+        try:
+            teacher_id = int(teacher_id_str)
+        except ValueError:
+            await callback.message.answer("Ошибка: неверный ID преподавателя.")
+            return
+        await callback.message.answer("Отправьте текст поздравления:")
+        await state.update_data(teacher_id=teacher_id)
+        await state.set_state(Form.waiting_for_greeting_text)
+
+    elif len(data_parts) == 3:  # Допустим, если ожидаем 3 аргумента
+        _, _, teacher_id_str = data_parts
+        try:
+            teacher_id = int(teacher_id_str)
+        except ValueError:
+            await callback.message.answer("Ошибка: неверный ID преподавателя.")
+            return
+        await callback.message.answer("Отправьте текст поздравления:")
+        await state.update_data(teacher_id=teacher_id)
+        await state.set_state(Form.waiting_for_greeting_text)
+
+    else:
+        await callback.message.answer("Ошибка: неверный формат данных.")
 
 
 @router.message(Form.waiting_for_greeting_text,
